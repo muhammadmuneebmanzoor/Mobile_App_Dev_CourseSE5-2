@@ -24,10 +24,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-// =====================================================
-// WELCOME PAGE
-// =====================================================
-
 class WelcomePage extends StatefulWidget {
   const WelcomePage({super.key});
 
@@ -35,31 +31,53 @@ class WelcomePage extends StatefulWidget {
   State<WelcomePage> createState() => _WelcomePageState();
 }
 
-class _WelcomePageState extends State<WelcomePage> {
-  double opacity = 1.0;
+class _WelcomePageState extends State<WelcomePage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacityAnimation;
+
   bool showButtons = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Wait 3 seconds before starting the fade animation.
-    Future.delayed(const Duration(seconds: 3), () {
-      if (!mounted) return;
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds:20 ),
+    );
 
-      setState(() {
-        opacity = 0.0;
-      });
+    _opacityAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeInOutCubic,
+      ),
+    );
 
-      // Wait for the fade animation to finish.
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!mounted) return;
+    _startAnimation();
+  }
 
-        setState(() {
-          showButtons = true;
-        });
-      });
+  Future<void> _startAnimation() async {
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    if (!mounted) return;
+
+    await _controller.forward();
+
+    if (!mounted) return;
+
+    setState(() {
+      showButtons = true;
     });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
@@ -81,10 +99,8 @@ class _WelcomePageState extends State<WelcomePage> {
         child: Center(
           child: showButtons
               ? loginSignupButtons(context)
-              : AnimatedOpacity(
-            opacity: opacity,
-            duration: const Duration(seconds: 2),
-            curve: Curves.easeInOut,
+              : FadeTransition(
+            opacity: _opacityAnimation,
             child: welcomeContent(),
           ),
         ),
@@ -173,7 +189,6 @@ class _WelcomePageState extends State<WelcomePage> {
             ),
           ),
           const SizedBox(height: 30),
-
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -192,9 +207,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ),
           ),
-
           const SizedBox(height: 15),
-
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -218,10 +231,6 @@ class _WelcomePageState extends State<WelcomePage> {
     );
   }
 }
-
-// =====================================================
-// SIGN UP PAGE
-// =====================================================
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -261,9 +270,7 @@ class _SignupPageState extends State<SignupPage> {
                       name = v!.trim();
                     },
                   ),
-
                   const SizedBox(height: 15),
-
                   TextFormField(
                     decoration: const InputDecoration(
                       labelText: 'SAP ID',
@@ -273,20 +280,16 @@ class _SignupPageState extends State<SignupPage> {
                       if (v == null || v.isEmpty) {
                         return 'Required';
                       }
-
                       if (int.tryParse(v) == null) {
                         return 'Numbers only';
                       }
-
                       return null;
                     },
                     onSaved: (v) {
                       sap = v!;
                     },
                   ),
-
                   const SizedBox(height: 15),
-
                   TextFormField(
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -296,20 +299,16 @@ class _SignupPageState extends State<SignupPage> {
                       if (v == null || v.isEmpty) {
                         return 'Required';
                       }
-
                       if (!v.contains('@')) {
                         return 'Invalid email';
                       }
-
                       return null;
                     },
                     onSaved: (v) {
                       email = v!;
                     },
                   ),
-
                   const SizedBox(height: 15),
-
                   TextFormField(
                     obscureText: true,
                     decoration: const InputDecoration(
@@ -319,20 +318,16 @@ class _SignupPageState extends State<SignupPage> {
                       if (v == null || v.isEmpty) {
                         return 'Required';
                       }
-
                       if (v.length < 6) {
                         return 'Minimum 6 characters';
                       }
-
                       return null;
                     },
                     onSaved: (v) {
                       password = v!;
                     },
                   ),
-
                   const SizedBox(height: 25),
-
                   ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
@@ -357,10 +352,6 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 }
-
-// =====================================================
-// LOGIN PAGE
-// =====================================================
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -398,20 +389,16 @@ class _LoginPageState extends State<LoginPage> {
                       if (v == null || v.isEmpty) {
                         return 'Required';
                       }
-
                       if (!v.contains('@')) {
                         return 'Invalid email';
                       }
-
                       return null;
                     },
                     onSaved: (v) {
                       e = v!;
                     },
                   ),
-
                   const SizedBox(height: 15),
-
                   TextFormField(
                     obscureText: true,
                     decoration: const InputDecoration(
@@ -421,16 +408,13 @@ class _LoginPageState extends State<LoginPage> {
                       if (v == null || v.isEmpty) {
                         return 'Required';
                       }
-
                       return null;
                     },
                     onSaved: (v) {
                       p = v!;
                     },
                   ),
-
                   const SizedBox(height: 25),
-
                   ElevatedButton(
                     onPressed: () {
                       if (_loginFormKey.currentState!.validate()) {
@@ -468,10 +452,6 @@ class _LoginPageState extends State<LoginPage> {
   }
 }
 
-// =====================================================
-// PROFILE PAGE
-// =====================================================
-
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -495,9 +475,7 @@ class ProfilePage extends StatelessWidget {
                     backgroundImage:
                     AssetImage('images/profilepic.png'),
                   ),
-
                   const SizedBox(height: 20),
-
                   Text(
                     name.isEmpty
                         ? 'Muhammad Muneeb Manzoor'
@@ -508,40 +486,30 @@ class ProfilePage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
                     'Software Engineering Student',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 18),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
                     'Riphah International University',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                   ),
-
                   const SizedBox(height: 10),
-
                   const Text(
                     'Semester 5',
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16),
                   ),
-
                   const SizedBox(height: 10),
-
                   Text(
                     'SAP ID: $sap',
                     textAlign: TextAlign.center,
                   ),
-
                   const SizedBox(height: 20),
-
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(15),
@@ -558,9 +526,7 @@ class ProfilePage extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 20),
-
                   const Text(
                     'I am a Software Engineering student interested '
                         'in Flutter, Web Development, and Python. '
@@ -569,9 +535,7 @@ class ProfilePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15),
                   ),
-
                   const SizedBox(height: 25),
-
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.push(
@@ -593,10 +557,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 }
-
-// =====================================================
-// HOME PAGE
-// =====================================================
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -620,30 +580,23 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: [
               const SizedBox(height: 20),
-
               const Text(
                 'Hello World !!!',
                 style: TextStyle(fontSize: 22),
               ),
-
               const SizedBox(height: 20),
-
               Container(
                 width: 100,
                 height: 100,
                 color: Colors.amber,
               ),
-
               const SizedBox(height: 20),
-
               const CircleAvatar(
                 radius: 50,
                 backgroundImage:
                 AssetImage('Images/Profile Image.png'),
               ),
-
               const SizedBox(height: 20),
-
               const AnimatedContainerWidget(),
             ],
           ),
